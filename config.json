@@ -1,0 +1,121 @@
+{
+  "excel_config": {
+    "auto": true,
+    "file_path": "data/business_metrics.xlsx",
+    "worksheet_name": null,
+    "date_column": "Date",
+    "metric_column": "Metric Name",
+    "value_column": "Value",
+    "datetime_format": "%Y-%m-%d %H:%M:%S",
+    "missing_value_policy": "skip",
+    "required_columns": ["Date", "Metric Name", "Value"]
+  },
+
+  "anomaly_detection": {
+    "method": "auto",
+    "z_score_threshold": 2.5,
+    "moving_avg_window": 7,
+    "moving_avg_deviation_pct": 30.0,
+    "threshold_bounds": {},
+    "lookback_days": 30,
+    "min_data_points": 10
+  },
+
+  "metrics": [
+    {
+      "name": "Sales Revenue",
+      "unit": "USD",
+      "priority": "HIGH",
+      "severity_threshold": 2.0,
+      "alert_cooldown_minutes": 30
+    },
+    {
+      "name": "Customer Logins",
+      "unit": "count",
+      "priority": "MEDIUM",
+      "severity_threshold": 1.5,
+      "alert_cooldown_minutes": 60
+    },
+    {
+      "name": "Failed Transactions",
+      "unit": "count",
+      "priority": "HIGH",
+      "severity_threshold": 2.0,
+      "alert_cooldown_minutes": 15
+    },
+    {
+      "name": "Server CPU",
+      "unit": "percent",
+      "priority": "HIGH",
+      "severity_threshold": 2.0,
+      "alert_cooldown_minutes": 15
+    }
+  ],
+
+  "email_config": {
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "sender_email": "your@gmail.com",
+    "sender_password": "REPLACE_ME",
+    "recipients": ["you@example.com"],
+    "cc": [],
+    "bcc": [],
+    "tls_enabled": true,
+    "retry_attempts": 3,
+    "retry_backoff_seconds": 5,
+    "attach_csv": false
+  },
+
+  "monitoring": {
+    "check_interval_seconds": 300,
+    "timezone": "UTC",
+    "business_hours": "09:00-17:00",
+    "alert_outside_business_hours": true,
+    "log_file": "logs/anomaly_detection.log"
+  },
+
+  "business_rules": [
+    {
+      "id": "rule_weekend_lower",
+      "metric": "Sales Revenue",
+      "condition": "day == 'Saturday' or day == 'Sunday'",
+      "reason": "Weekend sales typically lower; expected behavior",
+      "suppress_alert": true
+    },
+    {
+      "id": "rule_revenue_spike_friday",
+      "metric": "Sales Revenue",
+      "condition": "day == 'Friday' and deviation_percent > 20",
+      "reason": "End-of-week surge; expected behavior",
+      "suppress_alert": true
+    },
+    {
+      "id": "rule_failed_tx_high",
+      "metric": "Failed Transactions",
+      "condition": "current_value > 500",
+      "reason": "Payment gateway issue or fraud attempt; URGENT",
+      "suppress_alert": false,
+      "escalate": true
+    },
+    {
+      "id": "rule_login_drop",
+      "metric": "Customer Logins",
+      "condition": "deviation_percent < -20",
+      "reason": "Possible system outage or scheduled maintenance",
+      "suppress_alert": false,
+      "escalate": true
+    },
+    {
+      "id": "rule_cpu_peak",
+      "metric": "Server CPU",
+      "condition": "current_value > 85 and peak_hours",
+      "reason": "Expected traffic peak; consider scaling",
+      "suppress_alert": false
+    }
+  ],
+
+  "business_context": {
+    "peak_hours": [9, 10, 11, 12, 13, 14, 15, 16, 17],
+    "holidays": []
+  }
+}
